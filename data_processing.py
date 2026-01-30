@@ -20,11 +20,17 @@ def execute_scraping(term: str, places: list) -> pd.DataFrame:
     if "Mercado Livre" in places:
         url = f"https://lista.mercadolivre.com.br/{term.replace(" ", "-")}"
         driver.get(url)
-        time.sleep(5)
+        time.sleep(10)
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         # busca do item
         items = soup.find_all("div", {"class": "ui-search-result__wrapper"})
+        if not items:
+            items = soup.find_all("li", {"class": "ui-search-layout__item"})
+
+        if len(items) == 0:
+            st.write("O site pode ter bloqueado o acesso ou o seletor mudou.")
+            
         for i in items:            
             title = i.find("h2") or i.find("h3")
             price = i.select_one(".andes-money-amount__fraction")
